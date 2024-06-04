@@ -1,8 +1,35 @@
 import librosa
+import sounddevice as sd
+import soundfile as sf
+import os
 import numpy as np
 import tensorflow as tf
-import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
+
+# 녹음 설정
+duration = 10       # 녹음 시간 (초)
+fs = 44100          # 샘플링 레이트
+
+
+print("녹음을 시작")
+recording = sd.rec(int(duration * fs), samplerate=fs, channels=1, blocking=True)
+
+save_path = "저장할 위치"
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+
+        # 파일명 입력받기
+filename = "입력"+".wav"
+file_path = os.path.join(save_path, filename)
+
+sf.write(file_path, recording, fs)
+print(f"녹음 파일이 '{file_path}'에 저장되었습니다.")
+
+        # 녹음 데이터 로드
+y, sr = librosa.load(file_path)
+
+input_file_path = "저장한 파일 위치"  
 
 def extract_features(file_path, mfcc_max_padding):
     try:
@@ -16,10 +43,9 @@ def extract_features(file_path, mfcc_max_padding):
     
     return mfccs
 
-input_file_path = "C:/Users/emusigi/OneDrive/바탕 화면/R&E 파일/풀-데이타르/40_5_40_97.wav"  
 mfcc = extract_features(input_file_path, mfcc_max_padding=800)
 
-model = tf.keras.models.load_model('model.keras') 
+model = tf.keras.models.load_model('모델 keras 위치') 
 
 mfcc_input = mfcc.reshape(1, mfcc.shape[0], mfcc.shape[1], 1)
 predictions = model.predict(mfcc_input)
@@ -27,4 +53,4 @@ predictions = model.predict(mfcc_input)
 predicted_label = np.argmax(predictions) #예측값 출력
 
 #예측값 디코딩
-print(str(predicted_label*10+20)+'개')
+print(str(predicted_label*10+30)+'개')
